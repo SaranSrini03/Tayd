@@ -1,0 +1,51 @@
+/* app/styles/HomePage.module.css */
+
+
+.container {
+    display: flex;
+    height: 100vh;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--white); /* Light gray background */
+  }
+  
+  .inner {
+    text-align: center;
+    padding: 50px;
+    background-color: var(--white);
+    border-radius: 8px;
+  }
+  
+  .heading {
+    font-size: 3rem;
+    margin-bottom: -16px;
+    font-weight: 500;
+    color: var(--blue);
+
+  }
+  
+  .subheading {
+    font-size: 1.25rem;
+    color: #4a5568; /* Gray color */
+    margin-bottom: 40px;
+    font-weight: 300;
+    letter-spacing: 6px;
+
+  }
+  
+  .link {
+    display: inline-block;
+    padding: 10px 50px;
+    background-color: var(--blue); /* Blue color */
+    color: white;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 50px;
+    transition: background-color 0.2s;
+  }
+  
+  .link:hover {
+    background-color: var(--black); /* Darker blue color */
+  }
+  
