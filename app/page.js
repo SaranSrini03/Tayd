@@ -12,7 +12,7 @@ export default function HomePage() {
         <Link href="/auth" passHref>
           <span className={styles.link}>Get Started</span>
         </Link>
-        <h2 className={styles.subheading}>Made by NearCult</h2>
+        <h5 className={styles.credits}>Made by Nearcult</h5>
       </div>
     </div>
   );
