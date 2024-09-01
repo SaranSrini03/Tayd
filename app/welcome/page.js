@@ -15,12 +15,14 @@ export default function WelcomePage() {
   }, [user, router]);
 
   if (!user) {
-    return null; // or a loading state if you prefer
+    return null; // 
   }
 
   return (
     <div>
-      <h1>Hello, {user.firstName || user.username}!</h1>
+      <h1>Hello, {user.firstName +" "+ user.lastName || user.username}!</h1>
+      <h2>Thanks for logged in</h2>
+      <h2>We are currently in development</h2>
     </div>
   );
 }
