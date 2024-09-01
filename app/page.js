@@ -28,7 +28,7 @@ export default function HomePage() {
           
           if (data.success) {
             // Successfully synced data to MongoDB
-            router.push('/welcome');
+            router.push('/explore');
           } else {
             // Handle failure to sync data
             console.error('Failed to sync user data:', data.message);
@@ -51,7 +51,7 @@ export default function HomePage() {
         <button
           onClick={() => {
             if (isSignedIn) {
-              router.push('/welcome');
+              router.push('/explore');
             } else {
               router.push('/auth');
             }

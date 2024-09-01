@@ -13,7 +13,7 @@ export default function AuthPage() {
 
   useEffect(() => {
     if (isLoaded && userId) {
-      router.push('/welcome');
+      router.push('/explore');
     }
   }, [isLoaded, userId, router]);
 
