@@ -1,19 +1,20 @@
 "use client";
 
 import { useEffect } from 'react';
-import { useAuth } from '@clerk/nextjs';
+import { useAuth, useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import styles from './styles/HomePage.module.css';
 
 export default function HomePage() {
-  const { isSignedIn, user } = useAuth();
+  const { isSignedIn } = useAuth();
+  const { user } = useUser();
   const router = useRouter();
 
   useEffect(() => {
     const syncUserData = async () => {
       if (isSignedIn && user) {
         try {
-          const response = await fetch('/api/clerk-webhook', {
+          const response = await fetch('/api', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -21,16 +22,15 @@ export default function HomePage() {
             body: JSON.stringify({
               userId: user.id,
               email: user.emailAddresses[0]?.emailAddress,
+              password: user.password
             }),
           });
           
           const data = await response.json();
           
           if (data.success) {
-            // Successfully synced data to MongoDB
             router.push('/explore');
           } else {
-            // Handle failure to sync data
             console.error('Failed to sync user data:', data.message);
           }
         } catch (error) {
