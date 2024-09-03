@@ -1,8 +1,11 @@
+// app/explore/page.js
+
 "use client";
 
 import { useUser } from '@clerk/nextjs';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import NavBar from '../../components/NavBar'; // Import the NavBar component
 
 export default function ExplorePage() {
   const { user } = useUser();
@@ -15,14 +18,17 @@ export default function ExplorePage() {
   }, [user, router]);
 
   if (!user) {
-    return null; // 
+    return null;
   }
 
   return (
     <div>
-      <h1>Hello, {user.firstName +" "+ user.lastName || user.username}!</h1>
-      <h2>Thanks for logged in</h2>
-      <h2>We are currently in development</h2>
+      <NavBar /> {/* Add the NavBar component */}
+      <div style={{ padding: '20px', textAlign: 'center' }}>
+        <h1>Hello, {user.firstName + " " + user.lastName || user.username}!</h1>
+        <h2>Thanks for logging in</h2>
+        <h2>We are currently in development</h2>
+      </div>
     </div>
   );
 }
