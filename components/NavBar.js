@@ -13,11 +13,14 @@ export default function NavBar() {
     await signOut();
     router.push('/');
   };
+  const navToHome = () => {
+    router.push('/');
+  };
 
   return (
     <nav style={navStyle}>
       <div style={navContainerStyle}>
-        <h2 style={logoStyle}>TAYD</h2>
+        <h2 style={logoStyle} onClick={navToHome}>TAYD</h2>
         <button onClick={handleLogout} style={logoutButtonStyle}>
           Logout
         </button>
@@ -27,9 +30,12 @@ export default function NavBar() {
 }
 
 const navStyle = {
-  width: '100%',
+  transform: 'translateX(50%)',
+  width: '50%',
   backgroundColor: '#0070f3',
   padding: '10px 20px',
+  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+  margin:'20px 0px 0px 0px'
 };
 
 const navContainerStyle = {
@@ -43,6 +49,7 @@ const logoStyle = {
   fontSize: '24px',
   fontWeight: 'bold',
   margin: 0,
+  cursor:'pointer'
 };
 
 const logoutButtonStyle = {
@@ -50,6 +57,6 @@ const logoutButtonStyle = {
   backgroundColor: '#fff',
   color: '#0070f3',
   border: 'none',
-  borderRadius: '5px',
+  borderRadius: '15px',
   cursor: 'pointer',
 };
