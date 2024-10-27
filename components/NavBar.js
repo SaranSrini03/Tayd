@@ -3,9 +3,9 @@
 "use client";
 
 import { useClerk, useUser } from '@clerk/nextjs';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation'; // Import usePathname
 import { useState, useRef } from 'react';
-import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined'; // Import Material Icons
+import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 import PeopleOutlinedIcon from '@mui/icons-material/PeopleOutlined';
 import CreateOutlinedIcon from '@mui/icons-material/CreateOutlined';
 import BookOutlinedIcon from '@mui/icons-material/BookOutlined';
@@ -15,8 +15,12 @@ export default function NavBar() {
   const { signOut } = useClerk();
   const { user } = useUser();
   const router = useRouter();
+  const pathname = usePathname(); // Get the current path
   const [isOpen, setIsOpen] = useState(false);
   const profileImageRef = useRef(null);
+
+  // Ensure NavBar is only rendered on the /explore page
+  if (pathname !== '/explore') return null;
 
   const handleLogout = async () => {
     await signOut();
@@ -36,23 +40,21 @@ export default function NavBar() {
     return `${firstName?.[0] || ''}${lastName?.[0] || ''}`.toUpperCase();
   };
 
-  const userInitials = user?.fullName
-    ? getInitials(user.fullName)
-    : 'U'; // Default to 'U' if no name available
+  const userInitials = user?.fullName ? getInitials(user.fullName) : 'U';
 
   return (
     <>
       <nav className="bg-white bg-opacity-60 backdrop-blur-3xl shadow-md py-4 sticky top-0 z-50">
         <div className="container mx-auto flex justify-between items-center px-4">
-          <h2 
+          <h2
             className="text-blue-800 font-mono text-2xl font-bold cursor-pointer"
             onClick={navToHome}
           >
             TAYD.
           </h2>
 
-          {/* Icons Section */}
-          <div className="hidden md:flex space-x-28"> {/* Keep this section hidden on mobile */}
+          {/* Desktop Icons */}
+          <div className="hidden md:flex space-x-28">
             <button onClick={navToHome} className="flex items-center">
               <HomeOutlinedIcon className="w-6 h-6 text-blue-800" />
             </button>
@@ -80,7 +82,8 @@ export default function NavBar() {
                 className="w-10 h-10 border border-black rounded-full cursor-pointer"
                 onClick={toggleDropdown}
                 onError={() => {
-                  profileImageRef.current.src = 'https://ui-avatars.com/api/?name=Default';
+                  profileImageRef.current.src =
+                    'https://ui-avatars.com/api/?name=Default';
                 }}
               />
             ) : (
@@ -92,12 +95,15 @@ export default function NavBar() {
               </div>
             )}
 
-            {/* Dropdown Card */}
             {isOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-gray-300 border rounded-lg shadow-lg">
                 <div className="p-4 text-center">
-                  <p className="font-medium">{user?.fullName || user?.username}</p>
-                  <p className="text-sm text-gray-500">{user?.emailAddress}</p>
+                  <p className="font-medium">
+                    {user?.fullName || user?.username}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    {user?.emailAddress}
+                  </p>
                 </div>
                 <hr />
                 <button
@@ -112,8 +118,8 @@ export default function NavBar() {
         </div>
       </nav>
 
-      {/* Mobile Icons Section */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white shadow-md md:hidden"> {/* Keep this section visible only on mobile */}
+      {/* Mobile Icons */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white shadow-md md:hidden">
         <div className="flex justify-around py-2">
           <button onClick={navToHome} className="flex items-center">
             <HomeOutlinedIcon className="w-6 h-6 text-blue-800" />
