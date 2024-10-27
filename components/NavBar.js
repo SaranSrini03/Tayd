@@ -5,6 +5,7 @@
 import { useClerk, useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { useState, useRef } from 'react';
+import { HomeIcon, UsersIcon, PencilSquareIcon, BookOpenIcon, BellIcon } from '@heroicons/react/24/outline'; // Updated import for book icon
 
 export default function NavBar() {
   const { signOut } = useClerk();
@@ -19,7 +20,7 @@ export default function NavBar() {
   };
 
   const navToHome = () => {
-    router.push('/');
+    router.push('/explore');
   };
 
   const toggleDropdown = () => {
@@ -44,6 +45,25 @@ export default function NavBar() {
         >
           TAYD.
         </h2>
+
+        {/* Icons Section */}
+        <div className="flex space-x-3 lg:space-x-20 sm:space-x-10">
+          <button onClick={navToHome} className="flex items-center">
+            <HomeIcon className="w-7 h-7 text-blue-800" />
+          </button>
+          <button className="flex items-center">
+            <UsersIcon className="w-7 h-7 text-blue-800" />
+          </button>
+          <button className="flex items-center">
+            <PencilSquareIcon className="w-7 h-7 text-blue-800" />
+          </button>
+          <button className="flex items-center">
+            <BookOpenIcon className="w-7 h-7 text-blue-800" /> {/* Replaced StarIcon with BookOpenIcon */}
+          </button>
+          <button className="flex items-center">
+            <BellIcon className="w-7 h-7 text-blue-800" />
+          </button>
+        </div>
 
         {/* Profile Section */}
         <div className="relative">
