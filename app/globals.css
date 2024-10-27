@@ -1,4 +1,11 @@
 /* app/globals.css */
+/* styles/globals.css */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
 @import url('https://fonts.googleapis.com/css2?family=SUSE:wght@100..800&display=swap');
 :root{
   --blue:blue;
