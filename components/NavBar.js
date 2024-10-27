@@ -36,13 +36,13 @@ export default function NavBar() {
     : 'U'; // Default to 'U' if no name available
 
   return (
-    <nav className="bg-white shadow-md py-4 sticky top-0 z-50">
+    <nav className="bg-white bg-opacity-60 backdrop-blur-3xl shadow-md py-4 sticky top-0 z-50">
       <div className="container mx-auto flex justify-between items-center px-4">
         <h2 
           className="text-blue-800 font-mono text-2xl font-bold cursor-pointer"
           onClick={navToHome}
         >
-          TAYD
+          TAYD.
         </h2>
 
         {/* Profile Section */}
