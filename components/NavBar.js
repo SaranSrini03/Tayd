@@ -5,7 +5,7 @@
 import { useClerk, useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { useState, useRef } from 'react';
-import { HomeIcon, UsersIcon, PencilSquareIcon, BookOpenIcon, BellIcon } from '@heroicons/react/24/outline'; // Updated import for book icon
+import { FaHome, FaUsers, FaPen, FaBook, FaBell } from 'react-icons/fa'; // Importing icons from react-icons
 
 export default function NavBar() {
   const { signOut } = useClerk();
@@ -47,21 +47,40 @@ export default function NavBar() {
         </h2>
 
         {/* Icons Section */}
-        <div className="flex space-x-3 lg:space-x-20 sm:space-x-10">
+        <div className="hidden md:flex space-x-20"> {/* Keep this section hidden on mobile */}
           <button onClick={navToHome} className="flex items-center">
-            <HomeIcon className="w-7 h-7 text-blue-800" />
+            <FaHome className="w-7 h-7 text-blue-800" />
           </button>
           <button className="flex items-center">
-            <UsersIcon className="w-7 h-7 text-blue-800" />
+            <FaUsers className="w-7 h-7 text-blue-800" />
           </button>
           <button className="flex items-center">
-            <PencilSquareIcon className="w-7 h-7 text-blue-800" />
+            <FaPen className="w-7 h-7 text-blue-800" />
           </button>
           <button className="flex items-center">
-            <BookOpenIcon className="w-7 h-7 text-blue-800" /> {/* Replaced StarIcon with BookOpenIcon */}
+            <FaBook className="w-7 h-7 text-blue-800" />
           </button>
           <button className="flex items-center">
-            <BellIcon className="w-7 h-7 text-blue-800" />
+            <FaBell className="w-7 h-7 text-blue-800" />
+          </button>
+        </div>
+
+        {/* Mobile Icons Section */}
+        <div className="flex md:hidden space-x-5"> {/* Keep this section visible only on mobile */}
+          <button onClick={navToHome} className="flex items-center">
+            <FaHome className="w-6 h-6 text-blue-800" />
+          </button>
+          <button className="flex items-center">
+            <FaUsers className="w-6 h-6 text-blue-800" />
+          </button>
+          <button className="flex items-center">
+            <FaPen className="w-6 h-6 text-blue-800" />
+          </button>
+          <button className="flex items-center">
+            <FaBook className="w-6 h-6 text-blue-800" />
+          </button>
+          <button className="flex items-center">
+            <FaBell className="w-6 h-6 text-blue-800" />
           </button>
         </div>
 
