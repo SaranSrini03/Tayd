@@ -5,7 +5,11 @@
 import { useClerk, useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { useState, useRef } from 'react';
-import { FaHome, FaUsers, FaPen, FaBook, FaBell } from 'react-icons/fa'; // Importing icons from react-icons
+import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined'; // Import Material Icons
+import PeopleOutlinedIcon from '@mui/icons-material/PeopleOutlined';
+import CreateOutlinedIcon from '@mui/icons-material/CreateOutlined';
+import BookOutlinedIcon from '@mui/icons-material/BookOutlined';
+import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined';
 
 export default function NavBar() {
   const { signOut } = useClerk();
@@ -47,40 +51,40 @@ export default function NavBar() {
         </h2>
 
         {/* Icons Section */}
-        <div className="hidden md:flex space-x-20"> {/* Keep this section hidden on mobile */}
+        <div className="hidden md:flex space-x-28"> {/* Keep this section hidden on mobile */}
           <button onClick={navToHome} className="flex items-center">
-            <FaHome className="w-7 h-7 text-blue-800" />
+            <HomeOutlinedIcon className="w-6 h-6 text-blue-800" />
           </button>
           <button className="flex items-center">
-            <FaUsers className="w-7 h-7 text-blue-800" />
+            <PeopleOutlinedIcon className="w-6 h-6 text-blue-800" />
           </button>
           <button className="flex items-center">
-            <FaPen className="w-7 h-7 text-blue-800" />
+            <CreateOutlinedIcon className="w-6 h-6 text-blue-800" />
           </button>
           <button className="flex items-center">
-            <FaBook className="w-7 h-7 text-blue-800" />
+            <BookOutlinedIcon className="w-6 h-6 text-blue-800" />
           </button>
           <button className="flex items-center">
-            <FaBell className="w-7 h-7 text-blue-800" />
+            <NotificationsOutlinedIcon className="w-6 h-6 text-blue-800" />
           </button>
         </div>
 
         {/* Mobile Icons Section */}
         <div className="flex md:hidden space-x-5"> {/* Keep this section visible only on mobile */}
           <button onClick={navToHome} className="flex items-center">
-            <FaHome className="w-6 h-6 text-blue-800" />
+            <HomeOutlinedIcon className="w-6 h-6 text-blue-800" />
           </button>
           <button className="flex items-center">
-            <FaUsers className="w-6 h-6 text-blue-800" />
+            <PeopleOutlinedIcon className="w-6 h-6 text-blue-800" />
           </button>
           <button className="flex items-center">
-            <FaPen className="w-6 h-6 text-blue-800" />
+            <CreateOutlinedIcon className="w-6 h-6 text-blue-800" />
           </button>
           <button className="flex items-center">
-            <FaBook className="w-6 h-6 text-blue-800" />
+            <BookOutlinedIcon className="w-6 h-6 text-blue-800" />
           </button>
           <button className="flex items-center">
-            <FaBell className="w-6 h-6 text-blue-800" />
+            <NotificationsOutlinedIcon className="w-6 h-6 text-blue-800" />
           </button>
         </div>
 
