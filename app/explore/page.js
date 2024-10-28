@@ -5,31 +5,31 @@ import { useEffect, useState } from "react";
 import { collection, getDocs, orderBy, query } from "firebase/firestore";
 import { db } from "../../lib/firebaseConfig";
 import { useUser } from "@clerk/nextjs"; // Import useUser to get user details
-import { useRouter } from 'next/navigation'; // Import useRouter for navigation
+import { useRouter } from "next/navigation"; // Import useRouter for navigation
 
 export default function ExplorePage() {
   const [posts, setPosts] = useState([]);
-  const { user } = useUser(); // Get user details
+  const { user, isLoaded } = useUser(); // Get user details and loading state
   const router = useRouter(); // Initialize router
 
   useEffect(() => {
-    // Redirect to welcome page if user is not logged in
-    if (!user) {
-      router.push('/welcome');
-    } else {
-      const fetchPosts = async () => {
-        const q = query(collection(db, "posts"), orderBy("timestamp", "desc"));
-        const querySnapshot = await getDocs(q);
-        const postsData = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setPosts(postsData);
-      };
+    const fetchPosts = async () => {
+      const q = query(collection(db, "posts"), orderBy("timestamp", "desc"));
+      const querySnapshot = await getDocs(q);
+      const postsData = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setPosts(postsData);
+    };
 
-      fetchPosts();
+    // Redirect to welcome page if user is not logged in and is loaded
+    if (isLoaded && !user) {
+      router.push('/welcome');
+    } else if (isLoaded && user) {
+      fetchPosts(); // Fetch posts if the user is logged in
     }
-  }, [user, router]); // Include user and router in dependencies
+  }, [user, isLoaded, router]); // Include user, isLoaded, and router in dependencies
 
   return (
     <div className="container mx-auto p-6">
