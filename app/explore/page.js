@@ -10,27 +10,31 @@ import ThumbDownAltIcon from "@mui/icons-material/ThumbDownAlt"; // Dislike icon
 
 export default function ExplorePage() {
   const [posts, setPosts] = useState([]);
-  const { user } = useUser(); // Get user details
+  const { user, isLoaded } = useUser(); // Get user details and loading state
   const router = useRouter(); // Initialize router
+  const [loading, setLoading] = useState(true); // Loading state
 
   useEffect(() => {
-    // Redirect to welcome page if user is not logged in
-    if (!user) {
-      router.push('/welcome');
-    } else {
-      const fetchPosts = async () => {
-        const q = query(collection(db, "posts"), orderBy("timestamp", "desc"));
-        const querySnapshot = await getDocs(q);
-        const postsData = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setPosts(postsData);
-      };
+    const fetchPosts = async () => {
+      const q = query(collection(db, "posts"), orderBy("timestamp", "desc"));
+      const querySnapshot = await getDocs(q);
+      const postsData = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setPosts(postsData);
+    };
 
-      fetchPosts();
+    // Check if user is loaded
+    if (isLoaded) {
+      if (!user) {
+        router.push('/welcome');
+      } else {
+        fetchPosts(); // Fetch posts only if user is authenticated
+      }
+      setLoading(false); // Set loading to false after checking user status
     }
-  }, [user, router]); // Include user and router in dependencies
+  }, [user, isLoaded, router]); // Include user, isLoaded, and router in dependencies
 
   const handleLike = async (postId) => {
     const postRef = doc(db, "posts", postId);
@@ -139,6 +143,10 @@ export default function ExplorePage() {
       }
     }
   };
+
+  if (loading) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>; // Show loading state
+  }
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
