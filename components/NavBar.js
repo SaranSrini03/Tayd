@@ -1,46 +1,59 @@
 // components/NavBar.js
-
 "use client";
 
-import { useClerk, useUser } from '@clerk/nextjs';
-import { useRouter, usePathname } from 'next/navigation'; // Import usePathname
-import { useState, useRef } from 'react';
-import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
-import PeopleOutlinedIcon from '@mui/icons-material/PeopleOutlined';
-import CreateOutlinedIcon from '@mui/icons-material/CreateOutlined';
-import BookOutlinedIcon from '@mui/icons-material/BookOutlined';
-import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined';
+import { useClerk, useUser } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
+import { useState, useRef } from "react";
+import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
+import PeopleOutlinedIcon from "@mui/icons-material/PeopleOutlined";
+import CreateOutlinedIcon from "@mui/icons-material/CreateOutlined";
+import BookOutlinedIcon from "@mui/icons-material/BookOutlined";
+import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { db } from "../lib/firebaseConfig"; // Firebase
 
 export default function NavBar() {
   const { signOut } = useClerk();
   const { user } = useUser();
   const router = useRouter();
-  const pathname = usePathname(); // Get the current path
   const [isOpen, setIsOpen] = useState(false);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [inputValue, setInputValue] = useState("");
   const profileImageRef = useRef(null);
-
-  // Ensure NavBar is only rendered on the /explore page
-  if (pathname !== '/explore') return null;
 
   const handleLogout = async () => {
     await signOut();
-    router.push('/');
+    router.push("/");
   };
 
-  const navToHome = () => {
-    router.push('/explore');
-  };
+  const navToHome = () => router.push("/explore");
 
-  const toggleDropdown = () => {
-    setIsOpen((prev) => !prev);
+  const toggleDropdown = () => setIsOpen((prev) => !prev);
+
+  const openPopup = () => setIsPopupOpen(true);
+  const closePopup = () => setIsPopupOpen(false);
+
+  const handleAdd = async () => {
+    try {
+      await addDoc(collection(db, "posts"), {
+        text: inputValue,
+        user: user.fullName || user.username || "Anonymous",
+        timestamp: serverTimestamp(),
+      });
+      setInputValue("");
+      closePopup();
+      router.push("/explore"); // Navigate to explore page after posting
+    } catch (error) {
+      console.error("Error adding post: ", error);
+    }
   };
 
   const getInitials = (name) => {
-    const [firstName, lastName] = name.split(' ');
-    return `${firstName?.[0] || ''}${lastName?.[0] || ''}`.toUpperCase();
+    const [firstName, lastName] = name.split(" ");
+    return `${firstName?.[0] || ""}${lastName?.[0] || ""}`.toUpperCase();
   };
 
-  const userInitials = user?.fullName ? getInitials(user.fullName) : 'U';
+  const userInitials = user?.fullName ? getInitials(user.fullName) : "U";
 
   return (
     <>
@@ -53,7 +66,6 @@ export default function NavBar() {
             TAYD.
           </h2>
 
-          {/* Desktop Icons */}
           <div className="hidden md:flex space-x-28">
             <button onClick={navToHome} className="flex items-center">
               <HomeOutlinedIcon className="w-6 h-6 text-blue-800" />
@@ -61,7 +73,7 @@ export default function NavBar() {
             <button className="flex items-center">
               <PeopleOutlinedIcon className="w-6 h-6 text-blue-800" />
             </button>
-            <button className="flex items-center">
+            <button onClick={openPopup} className="flex items-center">
               <CreateOutlinedIcon className="w-6 h-6 text-blue-800" />
             </button>
             <button className="flex items-center">
@@ -72,7 +84,6 @@ export default function NavBar() {
             </button>
           </div>
 
-          {/* Profile Section */}
           <div className="relative">
             {user?.profileImageUrl ? (
               <img
@@ -81,10 +92,10 @@ export default function NavBar() {
                 alt="Profile"
                 className="w-10 h-10 border border-black rounded-full cursor-pointer"
                 onClick={toggleDropdown}
-                onError={() => {
-                  profileImageRef.current.src =
-                    'https://ui-avatars.com/api/?name=Default';
-                }}
+                onError={() =>
+                  (profileImageRef.current.src =
+                    "https://ui-avatars.com/api/?name=Default")
+                }
               />
             ) : (
               <div
@@ -101,9 +112,7 @@ export default function NavBar() {
                   <p className="font-medium">
                     {user?.fullName || user?.username}
                   </p>
-                  <p className="text-sm text-gray-500">
-                    {user?.emailAddress}
-                  </p>
+                  <p className="text-sm text-gray-500">{user?.emailAddress}</p>
                 </div>
                 <hr />
                 <button
@@ -118,7 +127,6 @@ export default function NavBar() {
         </div>
       </nav>
 
-      {/* Mobile Icons */}
       <div className="fixed bottom-0 left-0 right-0 bg-white shadow-md md:hidden">
         <div className="flex justify-around py-2">
           <button onClick={navToHome} className="flex items-center">
@@ -127,7 +135,7 @@ export default function NavBar() {
           <button className="flex items-center">
             <PeopleOutlinedIcon className="w-6 h-6 text-blue-800" />
           </button>
-          <button className="flex items-center">
+          <button onClick={openPopup} className="flex items-center">
             <CreateOutlinedIcon className="w-6 h-6 text-blue-800" />
           </button>
           <button className="flex items-center">
@@ -138,6 +146,35 @@ export default function NavBar() {
           </button>
         </div>
       </div>
+
+      {isPopupOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-80 space-y-4">
+            <h2 className="text-xl font-bold text-center">Add Your Thought</h2>
+            <input
+              type="text"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              placeholder="Type something..."
+              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600"
+            />
+            <div className="flex justify-between space-x-4">
+              <button
+                onClick={closePopup}
+                className="w-full px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAdd}
+                className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              >
+                Add
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
