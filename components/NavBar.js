@@ -23,7 +23,7 @@ export default function NavBar() {
 
   const handleLogout = async () => {
     await signOut();
-    router.push("/");
+    router.push("/welcome"); // Navigate to the welcome page after logout
   };
 
   const navToHome = () => router.push("/explore");
