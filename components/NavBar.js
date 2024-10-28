@@ -27,6 +27,7 @@ export default function NavBar() {
   };
 
   const navToHome = () => router.push("/explore");
+  const navToNotification = () => router.push("/notifications");
 
   const toggleDropdown = () => setIsOpen((prev) => !prev);
 
@@ -79,7 +80,7 @@ export default function NavBar() {
             <button className="flex items-center">
               <BookOutlinedIcon className="w-6 h-6 text-blue-800" />
             </button>
-            <button className="flex items-center">
+            <button onClick={navToNotification} className="flex items-center">
               <NotificationsOutlinedIcon className="w-6 h-6 text-blue-800" />
             </button>
           </div>
@@ -141,7 +142,7 @@ export default function NavBar() {
           <button className="flex items-center">
             <BookOutlinedIcon className="w-6 h-6 text-blue-800" />
           </button>
-          <button className="flex items-center">
+          <button onClick={navToNotification} className="flex items-center">
             <NotificationsOutlinedIcon className="w-6 h-6 text-blue-800" />
           </button>
         </div>

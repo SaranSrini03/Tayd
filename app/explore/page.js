@@ -1,18 +1,28 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { collection, getDocs, orderBy, query, updateDoc, doc } from "firebase/firestore"; // Import Firestore functions
+import {
+  collection,
+  getDocs,
+  orderBy,
+  query,
+  updateDoc,
+  doc,
+  addDoc,
+} from "firebase/firestore";
 import { db } from "../../lib/firebaseConfig";
-import { useUser } from "@clerk/nextjs"; // Import useUser to get user details
-import { useRouter } from "next/navigation"; // Import useRouter for navigation
-import ThumbUpAltIcon from "@mui/icons-material/ThumbUpAlt"; // Like icon
-import ThumbDownAltIcon from "@mui/icons-material/ThumbDownAlt"; // Dislike icon
+import { useUser } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
+import ThumbUpAltIcon from "@mui/icons-material/ThumbUpAlt";
+import ThumbDownAltIcon from "@mui/icons-material/ThumbDownAlt";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function ExplorePage() {
   const [posts, setPosts] = useState([]);
-  const { user, isLoaded } = useUser(); // Get user details and loading state
-  const router = useRouter(); // Initialize router
-  const [loading, setLoading] = useState(true); // Loading state
+  const { user, isLoaded } = useUser();
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -23,135 +33,152 @@ export default function ExplorePage() {
         ...doc.data(),
       }));
       setPosts(postsData);
+      setLoading(false);
     };
 
-    // Check if user is loaded
     if (isLoaded) {
       if (!user) {
-        router.push('/welcome');
+        router.push("/welcome");
       } else {
-        fetchPosts(); // Fetch posts only if user is authenticated
+        fetchPosts();
       }
-      setLoading(false); // Set loading to false after checking user status
     }
-  }, [user, isLoaded, router]); // Include user, isLoaded, and router in dependencies
+  }, [user, isLoaded, router]);
+
+  const notify = (message) => toast(message);
+
+  const saveNotification = async (postUserId, message) => {
+    try {
+      await addDoc(collection(db, "notifications"), {
+        userId: postUserId,
+        message,
+        timestamp: new Date(),
+      });
+    } catch (error) {
+      console.error("Error saving notification:", error);
+    }
+  };
 
   const handleLike = async (postId) => {
     const postRef = doc(db, "posts", postId);
-    
-    // Find the post to check current like status
     const post = posts.find((p) => p.id === postId);
-    
-    // Toggle like
-    if (post.likedBy?.includes(user.id)) {
-      // User already liked, so unlike it
+
+    if (!post) return; // Ensure post exists
+
+    const alreadyLiked = post.likedBy?.some((u) => u.id === user.id);
+    const alreadyDisliked = post.dislikedBy?.some((u) => u.id === user.id);
+
+    // If user already disliked, remove dislike first
+    if (alreadyDisliked) {
       await updateDoc(postRef, {
-        likes: (post.likes || 0) - 1,
-        likedBy: post.likedBy.filter(id => id !== user.id), // Remove user ID from likedBy array
+        dislikes: (post.dislikes || 0) - 1,
+        dislikedBy: post.dislikedBy.filter((u) => u.id !== user.id),
       });
-      setPosts((prevPosts) =>
-        prevPosts.map((post) =>
-          post.id === postId ? { ...post, likes: (post.likes || 0) - 1, likedBy: post.likedBy.filter(id => id !== user.id) } : post
+      setPosts((prev) =>
+        prev.map((p) =>
+          p.id === postId
+            ? { ...p, dislikes: (p.dislikes || 0) - 1, dislikedBy: post.dislikedBy.filter((u) => u.id !== user.id) }
+            : p
         )
       );
+      notify(`You undisliked ${post.user}'s post.`);
+    }
+
+    // Toggle like
+    if (alreadyLiked) {
+      await updateDoc(postRef, {
+        likes: (post.likes || 0) - 1,
+        likedBy: post.likedBy.filter((u) => u.id !== user.id),
+      });
+      setPosts((prev) =>
+        prev.map((p) =>
+          p.id === postId
+            ? { ...p, likes: (p.likes || 0) - 1, likedBy: post.likedBy.filter((u) => u.id !== user.id) }
+            : p
+        )
+      );
+      notify(`You unliked ${post.user}'s post.`);
     } else {
-      // User has not liked it yet, so like it
-      if (post.dislikedBy?.includes(user.id)) {
-        // User already disliked, so reset dislike count and add like
-        await updateDoc(postRef, {
-          dislikes: 0, // Set dislikes to 0
-          likedBy: [...(post.likedBy || []), user.id], // Add user ID to likedBy array
-          likes: (post.likes || 0) + 1, // Increment like count
-          dislikedBy: post.dislikedBy.filter(id => id !== user.id), // Remove user ID from dislikedBy array
-        });
-        setPosts((prevPosts) =>
-          prevPosts.map((post) =>
-            post.id === postId ? {
-              ...post,
-              dislikes: 0,
-              likes: (post.likes || 0) + 1,
-              likedBy: [...(post.likedBy || []), user.id],
-              dislikedBy: post.dislikedBy.filter(id => id !== user.id),
-            } : post
-          )
-        );
-      } else {
-        // User has not disliked it yet, so like it
-        await updateDoc(postRef, {
-          likes: (post.likes || 0) + 1,
-          likedBy: [...(post.likedBy || []), user.id], // Add user ID to likedBy array
-        });
-        setPosts((prevPosts) =>
-          prevPosts.map((post) =>
-            post.id === postId ? { ...post, likes: (post.likes || 0) + 1, likedBy: [...(post.likedBy || []), user.id] } : post
-          )
-        );
-      }
+      await updateDoc(postRef, {
+        likes: (post.likes || 0) + 1,
+        likedBy: [...(post.likedBy || []), { id: user.id, name: user.fullName }],
+      });
+      setPosts((prev) =>
+        prev.map((p) =>
+          p.id === postId
+            ? { ...p, likes: (p.likes || 0) + 1, likedBy: [...(post.likedBy || []), { id: user.id, name: user.fullName }] }
+            : p
+        )
+      );
+      notify(`${user.fullName} liked ${post.user}'s post.`);
+      await saveNotification(post.userId, `${user.fullName} liked your post.`);
     }
   };
 
   const handleDislike = async (postId) => {
     const postRef = doc(db, "posts", postId);
-    
-    // Find the post to check current dislike status
     const post = posts.find((p) => p.id === postId);
-    
-    // Check if the user has already liked the post
-    if (post.likedBy?.includes(user.id)) {
-      // User already liked, so reset like count and add dislike
+
+    if (!post) return; // Ensure post exists
+
+    const alreadyDisliked = post.dislikedBy?.some((u) => u.id === user.id);
+    const alreadyLiked = post.likedBy?.some((u) => u.id === user.id);
+
+    // If user already liked, remove like first
+    if (alreadyLiked) {
       await updateDoc(postRef, {
-        likes: 0, // Set likes to 0
-        dislikedBy: [...(post.dislikedBy || []), user.id], // Add user ID to dislikedBy array
-        dislikes: (post.dislikes || 0) + 1, // Increment dislike count
-        likedBy: post.likedBy.filter(id => id !== user.id), // Remove user ID from likedBy array
+        likes: (post.likes || 0) - 1,
+        likedBy: post.likedBy.filter((u) => u.id !== user.id),
       });
-      setPosts((prevPosts) =>
-        prevPosts.map((post) =>
-          post.id === postId ? {
-            ...post,
-            likes: 0,
-            dislikes: (post.dislikes || 0) + 1,
-            dislikedBy: [...(post.dislikedBy || []), user.id],
-            likedBy: post.likedBy.filter(id => id !== user.id),
-          } : post
+      setPosts((prev) =>
+        prev.map((p) =>
+          p.id === postId
+            ? { ...p, likes: (p.likes || 0) - 1, likedBy: post.likedBy.filter((u) => u.id !== user.id) }
+            : p
         )
       );
+      notify(`You unliked ${post.user}'s post.`);
+    }
+
+    // Toggle dislike
+    if (alreadyDisliked) {
+      await updateDoc(postRef, {
+        dislikes: (post.dislikes || 0) - 1,
+        dislikedBy: post.dislikedBy.filter((u) => u.id !== user.id),
+      });
+      setPosts((prev) =>
+        prev.map((p) =>
+          p.id === postId
+            ? { ...p, dislikes: (p.dislikes || 0) - 1, dislikedBy: post.dislikedBy.filter((u) => u.id !== user.id) }
+            : p
+        )
+      );
+      notify(`You undisliked ${post.user}'s post.`);
     } else {
-      // User has not disliked it yet, so add dislike
-      if (post.dislikedBy?.includes(user.id)) {
-        // User already disliked, so remove dislike
-        await updateDoc(postRef, {
-          dislikes: (post.dislikes || 0) - 1,
-          dislikedBy: post.dislikedBy.filter(id => id !== user.id), // Remove user ID from dislikedBy array
-        });
-        setPosts((prevPosts) =>
-          prevPosts.map((post) =>
-            post.id === postId ? { ...post, dislikes: (post.dislikes || 0) - 1, dislikedBy: post.dislikedBy.filter(id => id !== user.id) } : post
-          )
-        );
-      } else {
-        // User has not disliked it yet, so add dislike
-        await updateDoc(postRef, {
-          dislikes: (post.dislikes || 0) + 1,
-          dislikedBy: [...(post.dislikedBy || []), user.id], // Add user ID to dislikedBy array
-        });
-        setPosts((prevPosts) =>
-          prevPosts.map((post) =>
-            post.id === postId ? { ...post, dislikes: (post.dislikes || 0) + 1, dislikedBy: [...(post.dislikedBy || []), user.id] } : post
-          )
-        );
-      }
+      await updateDoc(postRef, {
+        dislikes: (post.dislikes || 0) + 1,
+        dislikedBy: [...(post.dislikedBy || []), { id: user.id, name: user.fullName }],
+      });
+      setPosts((prev) =>
+        prev.map((p) =>
+          p.id === postId
+            ? { ...p, dislikes: (p.dislikes || 0) + 1, dislikedBy: [...(post.dislikedBy || []), { id: user.id, name: user.fullName }] }
+            : p
+        )
+      );
+      notify(`${user.fullName} disliked ${post.user}'s post.`);
+      await saveNotification(post.userId, `${user.fullName} disliked your post.`);
     }
   };
 
   if (loading) {
-    return <div className="flex items-center justify-center h-screen">Loading...</div>; // Show loading state
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
   }
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
       <div className="container p-6 flex flex-col items-center">
-        <h1 className="text-2xl font-bold mb-2 mt-0">Explore</h1> {/* Set margin-top to 0 */}
+        <h1 className="text-2xl font-bold mb-2 mt-0">Explore</h1>
         <div className="space-y-4 w-full max-w-md">
           {posts.length ? (
             posts.map((post) => (
@@ -162,12 +189,26 @@ export default function ExplorePage() {
                   {post.timestamp?.toDate().toLocaleString()}
                 </p>
                 <div className="flex justify-center space-x-4 mt-2">
-                  <div className="flex items-center cursor-pointer" onClick={() => handleLike(post.id)}>
-                    <ThumbUpAltIcon className={`text-blue-500 ${post.likedBy?.includes(user.id) ? 'text-blue-600' : ''}`} />
+                  <div
+                    className="flex items-center cursor-pointer"
+                    onClick={() => handleLike(post.id)}
+                  >
+                    <ThumbUpAltIcon
+                      className={`text-blue-500 ${
+                        post.likedBy?.some((u) => u.id === user.id) ? "text-blue-600" : ""
+                      }`}
+                    />
                     <span className="ml-1">{post.likes || 0}</span>
                   </div>
-                  <div className="flex items-center cursor-pointer" onClick={() => handleDislike(post.id)}>
-                    <ThumbDownAltIcon className={`text-red-500 ${post.dislikedBy?.includes(user.id) ? 'text-red-600' : ''}`} />
+                  <div
+                    className="flex items-center cursor-pointer"
+                    onClick={() => handleDislike(post.id)}
+                  >
+                    <ThumbDownAltIcon
+                      className={`text-red-500 ${
+                        post.dislikedBy?.some((u) => u.id === user.id) ? "text-red-600" : ""
+                      }`}
+                    />
                     <span className="ml-1">{post.dislikes || 0}</span>
                   </div>
                 </div>
@@ -178,6 +219,7 @@ export default function ExplorePage() {
           )}
         </div>
       </div>
+      <ToastContainer position="top-center" autoClose={3000} />
     </div>
   );
 }
