@@ -104,7 +104,7 @@ export default function ExplorePage() {
   }
 
   return (
-    <div className="flex flex-col items-center min-h-screen bg-gray-100">
+    <div className="flex flex-col pb-20 items-center min-h-screen bg-gray-100">
       <div className="w-full max-w-md p-6">
         <h1 className="text-2xl font-bold text-center mb-4">Explore</h1>
       </div>
