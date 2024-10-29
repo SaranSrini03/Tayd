@@ -17,7 +17,7 @@ export default function WelcomePage() {
   };
 
   return (
-    <div className="min-h-screen font-mono bg-gradient-to-r from-blue-500 to-indigo-600">
+    <div className="min-h-screen bg-gradient-to-r from-blue-500 to-indigo-600">
       <div className="flex flex-col items-center justify-center h-[calc(100vh-64px)] text-white text-center px-4 space-y-4">
         <h1 className="text-5xl font-bold">Welcome to TAYD!</h1>
         <p className="text-lg text-gray-100">

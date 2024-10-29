@@ -8,12 +8,14 @@ import {
   query,
   limit,
   startAfter,
+  // Removed deleteDoc and doc imports since we won't be using them
 } from "firebase/firestore";
 import { db } from "../../lib/firebaseConfig";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import ThumbUpAltIcon from "@mui/icons-material/ThumbUpAlt";
 import ThumbDownAltIcon from "@mui/icons-material/ThumbDownAlt";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -24,6 +26,7 @@ export default function ExplorePage() {
   const [lastPost, setLastPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
+  const [reportPostId, setReportPostId] = useState(null); // State to track which post to report
   const { user, isLoaded } = useUser();
   const router = useRouter();
   const observer = useRef(); // Ref for IntersectionObserver
@@ -99,12 +102,55 @@ export default function ExplorePage() {
     // Dislike logic here...
   };
 
+  const handleReport = async () => {
+    if (reportPostId) {
+      // Here you can implement your reporting logic (e.g., send report to your server)
+      // For example:
+      // await reportPostToServer(reportPostId, user.id); // Pseudo function
+      notify("Post reported successfully.");
+      setReportPostId(null);
+    }
+  };
+
+  const renderPostMenu = (post) => {
+    // Check if the current user is the author of the post
+    const isAuthor = user?.id === post.userId;
+
+    // Debugging logs
+    console.log("Current User ID:", user?.id);
+    console.log("Post Author ID:", post.userId);
+    console.log("Is Author:", isAuthor);
+
+    return (
+      <div className="absolute right-4 top-2">
+        <MoreVertIcon
+          onClick={() => setReportPostId(post.id)}
+          className="cursor-pointer"
+        />
+        {reportPostId === post.id && ( // Show report option
+          <div className="absolute bg-white border shadow-md rounded-md mt-2">
+            <div
+              onClick={handleReport}
+              className="px-4 py-2 cursor-pointer hover:bg-gray-200"
+            >
+              Report
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   if (loading) {
-    return <div className="flex items-center justify-center h-screen">Loading... Just vibing in digital traffic. 🚦.</div>;
+    return (
+      <div className="flex items-center justify-center h-screen">
+        Loading... Just vibing in digital traffic. 🚦
+      </div>
+    );
   }
 
   return (
-    <div className="flex flex-col pb-20 items-center min-h-screen bg-gray-100">
+    <div className="flex flex-col items-center min-h-screen bg-gray-100">
       <div className="w-full max-w-md p-6">
         <h1 className="text-2xl font-bold text-center mb-4">Explore</h1>
       </div>
@@ -115,8 +161,10 @@ export default function ExplorePage() {
           <div
             key={post.id}
             ref={index === posts.length - 1 ? lastPostRef : null}
-            className="p-4 bg-white shadow-md rounded-md border border-black" // Added border class here
+            className="relative p-4 bg-white shadow-md rounded-md"
           >
+            {renderPostMenu(post)} {/* Pass the entire post object */}
+
             <h2 className="text-xl font-semibold">{post.user}</h2>
             <p className="mt-2">{post.text}</p>
             <p className="mt-2 text-sm text-gray-500">
